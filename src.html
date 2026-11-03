@@ -312,6 +312,10 @@
   #dim { transition: opacity .45s var(--ease); }
   /* 민트 배경이 화면을 덮은 뒤 딤 화면은 치워 둠 */
   .s-fortune #dim { opacity: 0; pointer-events: none; transition: opacity 0s linear .8s; }
+  /* X로 닫을 때: 운세 화면은 건너뛰고(움직임 없이 숨김) 딤만 부드럽게 사라지며 홈이 드러남 */
+  .x-close #fortune, .x-close #fortune * { visibility: hidden !important; transition: none !important; }
+  .x-close #dim { transition: opacity .45s var(--ease) !important; }
+  .x-close #home { transition: opacity .45s var(--ease), transform .6s var(--ease) !important; }
   #modal { left: 58px; top: 225px; width: 298px; height: 355px; overflow: hidden;
            -webkit-mask: url(__img_modal_mask__) 0 0 / 100% 100%; mask: url(__img_modal_mask__) 0 0 / 100% 100%;
            transform: scale(.985); transition: transform 1.8s var(--ease); }
@@ -332,8 +336,8 @@
     transition: opacity .7s var(--ease), transform .9s var(--ease), filter .7s var(--ease);
   }
   .sticker span { display: inline-block; }
-  #dim2 { opacity: 0; transform: scale(1.012); transform-origin: 206px 402px; transition: opacity 1.9s var(--ease), transform 1.9s var(--ease); }
-  .s-clear #dim2 { opacity: 1; transform: none; }
+  #dim2 { opacity: 0; transition: opacity 1.9s var(--ease); }
+  .s-clear #dim2 { opacity: 1; }
   .s-clear .sticker { opacity: 0; transform: scale(1.08); filter: blur(8px); transition-delay: .25s; }
 
   .reveal { opacity: 0; transform: translateY(8px); pointer-events: none;
@@ -758,19 +762,22 @@ function go(state) {
 // 페이지를 열 때는 항상 오늘의운세_딤1부터. 한 번 본 뒤 '처음부터'를 누르면 홈_기본에서 시작 (오늘의 운세는 하루 한 번)
 let fortuneSeen = false;
 function markFortuneSeen() { fortuneSeen = true; }
+let startSeq = 0;
 function start(forceFortune) {
-  clearTimeout(timer);
+  clearTimeout(timer); const seq = ++startSeq;
   phone.classList.add("no-anim");
+  phone.classList.remove("x-close");
   resetNav();
-  if (fortuneSeen && !forceFortune) {
-    go("home");
-  } else {
-    go("dim");
-    // 1 → 2: 탭 없이 블러가 서서히 걷힘
-    timer = setTimeout(() => go("clear"), 1100);
-  }
+  const toHome = fortuneSeen && !forceFortune;
+  go(toHome ? "home" : "dim");
   void phone.offsetWidth;
-  phone.classList.remove("no-anim");
+  // 화면이 실제로 그려진 다음(두 프레임 뒤)에 애니메이션을 다시 켬 → 되돌아가는 모션이 보이지 않음
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (seq !== startSeq) return;
+    phone.classList.remove("no-anim");
+    // 1 → 2: 탭 없이 블러가 서서히 걷힘
+    if (!toHome) timer = setTimeout(() => go("clear"), 1100);
+  }));
 }
 
 // 2 → 3: 보러가기
@@ -779,7 +786,9 @@ document.getElementById("dimBtn").addEventListener("click", () => {
 });
 // 딤 화면의 X: 바로 홈으로
 document.getElementById("dimX").addEventListener("click", () => {
-  markFortuneSeen(); phone.classList.add("s-fortune"); phone.classList.add("s-home");
+  if (!phone.classList.contains("s-clear") || phone.classList.contains("s-fortune")) return;
+  markFortuneSeen(); clearTimeout(timer);
+  phone.classList.add("x-close", "s-fortune", "s-home");
 });
 // 3 → 4: 운세 화면 탭
 document.getElementById("fortune").addEventListener("click", () => {
@@ -791,10 +800,11 @@ const frScroll = document.getElementById("frScroll");
 function setTab(name, instant) {
   if (name === tab && !instant) { if (name === "friends") frScroll.scrollTo({ top: 0, behavior: "smooth" }); return; }
   tab = name;
-  if (instant) phone.classList.add("no-anim");
+  const owned = instant && !phone.classList.contains("no-anim");   // 이미 바깥에서 애니메이션을 끈 상태면 건드리지 않음
+  if (owned) phone.classList.add("no-anim");
   phone.classList.toggle("tab-friends", name === "friends");
   if (name === "friends") frScroll.scrollTop = 0;
-  if (instant) { void phone.offsetWidth; phone.classList.remove("no-anim"); }
+  if (owned) { void phone.offsetWidth; phone.classList.remove("no-anim"); }
 }
 document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
   if (busy || stack.length > 1 || !phone.classList.contains("s-home")) return;
