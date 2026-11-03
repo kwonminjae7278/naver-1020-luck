@@ -332,6 +332,8 @@
     transition: opacity .7s var(--ease), transform .9s var(--ease), filter .7s var(--ease);
   }
   .sticker span { display: inline-block; }
+  #dim2 { opacity: 0; transform: scale(1.012); transform-origin: 206px 402px; transition: opacity 1.9s var(--ease), transform 1.9s var(--ease); }
+  .s-clear #dim2 { opacity: 1; transform: none; }
   .s-clear .sticker { opacity: 0; transform: scale(1.08); filter: blur(8px); transition-delay: .25s; }
 
   .reveal { opacity: 0; transform: translateY(8px); pointer-events: none;
@@ -350,7 +352,7 @@
          clip-path: circle(0px at 206px 410px); transition: clip-path .75s var(--ease); }
   .s-fortune #fBg, .s-home #fBg { clip-path: circle(1000px at 206px 410px); }
   /* 공유 요소: 모달 카드가 운세 카드로 */
-  #morph { left: 58px; top: 225px; width: 298px; height: 355px; visibility: hidden;
+  #morph { left: 60px; top: 228px; width: 293px; height: 348px; visibility: hidden;
            transition: left .75s var(--ease), top .75s var(--ease), width .75s var(--ease), height .75s var(--ease); }
   #morph img { position: absolute; inset: 0; width: 100%; height: 100%; }
   #morphTo { opacity: 0; transition: opacity .4s var(--ease) .22s; }
@@ -425,11 +427,11 @@
 
   <!-- 1·2. 오늘의운세_딤 / 딤2 -->
   <div class="layer" id="dim">
-    <img class="abs" src="__img_dim_base__" style="left:0;top:0;width:402px;height:874px" alt="">
-    <div class="abs" id="modal"><img src="__img_modal_blur__" alt=""><img class="sharp" src="__img_modal_fill__" alt=""></div>
-    <div class="sticker" aria-hidden="true"><span>OCT 19</span><br><span>SUN</span></div>
-    <img class="abs reveal" id="dimX" src="__img_dim_x__" style="left:316px;top:217px;width:44px;height:44px" alt="닫기">
-    <img class="abs reveal" id="dimBtn" src="__img_dim_btn__" style="left:130px;top:606px;width:142px;height:57px" alt="보러가기">
+    <!-- 딤1(흐린 카드 + 날짜) → 딤2(선명한 카드)로 자연스럽게 바뀜: 시안 이미지 그대로 -->
+    <img class="abs" src="__img_dim1_full__" style="left:0;top:0;width:402px;height:874px" alt="OCT 19 SUN">
+    <img class="abs" id="dim2" src="__img_dim2_clean__" style="left:0;top:0;width:402px;height:874px" alt="오늘의 행운 아이템">
+    <img class="abs reveal" id="dimX" src="__img_dim_x__" style="left:316px;top:214px;width:46px;height:50px" alt="닫기">
+    <img class="abs reveal" id="dimBtn" src="__img_dim_btn__" style="left:120px;top:600px;width:164px;height:72px" alt="보러가기">
   </div>
 
   <!-- 3. 오늘의운세_화면 -->

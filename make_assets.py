@@ -568,3 +568,56 @@ d = np.minimum(py - TOPv, BOTv - py); hw = np.interp(d, ud, uh, left=-1, right=H
 inside = (d >= 0) & (np.abs(px - CXv) <= hw)
 al = Image.fromarray((inside * 255).astype(np.uint8)).resize((W3, H3), Image.LANCZOS)
 mk = Image.new('RGBA', (W3, H3), (0, 0, 0, 0)); mk.putalpha(al); mk.save(f'{O}/cam_mask.png')
+
+# ═════════ 새 오늘의운세_딤1/딤2 (시안 62·63) ═════════
+L62, L63 = L(62), L(63)
+A62 = np.asarray(L62).astype(float); A63 = np.asarray(L63).astype(float)
+Image.fromarray(A62.astype(np.uint8)).save(f'{O}/dim1_full.jpg', quality=95)
+# 딤2에서 X·보러가기를 뺀 배경: X는 카드의 좌우 대칭 반대편, 버튼은 딤1 배경으로
+diff = np.abs(A62 - A63).max(2) > 12
+CXm = (61.75 + 351.0) / 2
+cleanB = A63.copy()
+XB = (316, 214, 362, 264)
+for y in range(XB[1], XB[3]):
+    for x in range(XB[0], XB[2]):
+        mx = int(round(2 * CXm - x)); src = A63[y, mx]
+        cleanB[y, x] = src if (src[1] > 200 and src[0] < 150) else A62[y, x]   # 카드 안쪽만 대칭 복사, 바깥은 딤1 배경
+BB = (120, 600, 284, 672); cleanB[BB[1]:BB[3], BB[0]:BB[2]] = A62[BB[1]:BB[3], BB[0]:BB[2]]
+Image.fromarray(cleanB.astype(np.uint8)).save(f'{O}/dim2_clean.jpg', quality=95)
+xi = np.asarray(keyed(L63, cleanB, XB, thr=14, soft=30)).copy(); xi[..., 3] = largest_component(xi[..., 3], 60)
+Image.fromarray(xi, 'RGBA').save(f'{O}/dim_x.png')
+keyed(L63, cleanB, BB, thr=14, soft=30).save(f'{O}/dim_btn.png')
+# 운세 화면으로 이어지는 카드(모프 시작): 왼쪽 윤곽을 4배로 재고 좌우·상하 대칭으로 매끄럽게
+A63x4 = np.asarray(L63.resize((402 * 4, 874 * 4), Image.LANCZOS)).astype(int)
+mint63 = (A63x4[..., 1] > 200) & (A63x4[..., 0] < 150) & (A63x4[..., 2] > 140)
+TOPm, BOTm = 229.25, 574.5
+left = {}
+for yy in range(int(TOPm * 4), int(BOTm * 4)):
+    xs = np.nonzero(mint63[yy, 40 * 4:210 * 4])[0]
+    if len(xs): left[yy / 4] = xs.min() / 4 + 40
+dsm = np.array([min(y - TOPm, BOTm - y) for y in left]); hwm = np.array([CXm - v for v in left.values()])
+o = np.argsort(dsm); dsm = dsm[o]; hwm = np.maximum.accumulate(hwm[o]); HWm = hwm.max()
+MB = (60, 228, 353, 576); K = 3; W3, H3 = (MB[2] - MB[0]) * K, (MB[3] - MB[1]) * K; SS = 4
+yy, xx = np.mgrid[0:H3 * SS, 0:W3 * SS]; py = MB[1] + (yy + .5) / (K * SS); px = MB[0] + (xx + .5) / (K * SS)
+d = np.minimum(py - TOPm, BOTm - py); hw = np.interp(d, dsm, hwm, left=-1, right=HWm)
+alm = Image.fromarray((((d >= 0) & (np.abs(px - CXm) <= hw)) * 255).astype(np.uint8)).resize((W3, H3), Image.LANCZOS)
+cardc = Image.fromarray(cleanB[MB[1]:MB[3], MB[0]:MB[2]].astype(np.uint8)).resize((W3, H3), Image.LANCZOS)
+cardc.putalpha(alm); cardc.save(f'{O}/modal_card.png')
+print('modal', MB, 'hw', HWm)
+
+# 카메라: 원래 시안의 뷰파인더 사진을 배경에서 지움 → 매끄러운 마스크 밖으로 옛 사진 모서리가 삐져나오지 않음
+cb = np.asarray(L16).copy(); cb[203:651, 18:384] = 14
+Image.fromarray(cb).save(f'{O}/cam_base.jpg', quality=92)
+# 뷰파인더 사진: 원래 둥근 모서리 바깥(검정)을 사진 가장자리 색으로 채움 → 새 마스크 경계에 검은 틈이 안 생김
+ph = np.asarray(Image.open(f'{O}/cam_photo.jpg').convert('RGB')).astype(float)
+dark = np.abs(ph - 14).max(2) <= 14
+ins = fill_holes(~dark)                                     # 가장자리에서 이어진 어두운 영역만 '사진 밖'
+ins = np.asarray(Image.fromarray((ins * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(5))) > 0   # 경계의 어두운 테두리도 제외
+filled = ph.copy(); known = ins.copy()
+for _ in range(60):
+    if known.all(): break
+    acc = np.zeros_like(filled); cnt = np.zeros(known.shape)
+    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)):
+        acc += np.roll(np.roll(filled * known[..., None], dy, 0), dx, 1); cnt += np.roll(np.roll(known, dy, 0), dx, 1)
+    grow = ~known & (cnt > 0); filled[grow] = acc[grow] / cnt[grow, None]; known |= grow
+Image.fromarray(filled.clip(0, 255).astype(np.uint8)).save(f'{O}/cam_photo.jpg', quality=93)
