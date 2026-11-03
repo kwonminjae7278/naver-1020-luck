@@ -504,3 +504,23 @@ col[: 257 - y0, 110 - x0: 300 - x0] = (14, 14, 14)                 # 스티커 �
 col[: 250 - y0] = 14                                               # 기둥(y≈257) 위쪽은 모두 카드 검정 → 윗변 잡티 제거
 big = Image.fromarray(col).resize((W3, H3), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=2.4, percent=70, threshold=1))
 big.putalpha(alpha); big.save(f'{O}/f_card.png')
+
+# ═════════ 채팅 고화질: 사진류만 이미지로 (텍스트·말풍선·버튼은 HTML로 다시 그림) ═════════
+def circle_crop(img, cx, cy, r, name):
+    c = img.crop((cx - r, cy - r, cx + r, cy + r)).convert('RGBA'); S4 = 4
+    yy, xx = np.mgrid[0:2*r*S4, 0:2*r*S4]; m = (np.hypot(yy - r*S4 + .5, xx - r*S4 + .5) <= r*S4 - 1).astype(np.uint8) * 255
+    c.putalpha(Image.fromarray(m).resize((2*r, 2*r), Image.LANCZOS)); c.save(f'{O}/{name}.png')
+circle_crop(L30, 40, 244, 21, 'av_dayun'); circle_crop(L30, 40, 490, 21, 'av_sumin')
+# 순위 바 아바타 (둥근 모양 + 숫자 배지 포함, 이미지 그대로)
+for name, box in {'rk_av1': (24, 198, 92, 262), 'rk_av2': (104, 198, 172, 262), 'rk_av3': (184, 198, 252, 262)}.items():
+    feather(L32.crop(box), 3).save(f'{O}/{name}.png')
+L37.crop((122, 735, 244, 860)).save(f'{O}/ch_place_photo.jpg', quality=93)   # 장소 카드 사진
+feather(L37.crop((82, 568, 194, 605)), 2).save(f'{O}/ch_mix_logo.png')        # Lucky mix 로고
+# 순위 아바타: 원형(지름 62) + 숫자 배지는 HTML로 다시 그림
+# 순위 아바타: 시안 그대로(숫자 배지 포함), 윤곽 = 아바타 원 ∪ 배지 원 → 배지가 잘리지 않음
+for name, (cx, cy, bx) in {'rk_av1': (58, 231, 72.1), 'rk_av2': (137, 231, 152.4), 'rk_av3': (217, 231, 233.1)}.items():
+    r = 31; K = 4; c = L32.crop((cx - r, cy - r, cx + r, cy + r)).convert('RGBA')
+    yy, xx = (np.mgrid[0:2*r*K, 0:2*r*K] + .5) / K
+    m = (np.hypot(yy - r, xx - r) <= r - .3) | (np.hypot(yy - (238.4 - cy + r), xx - (bx - cx + r)) <= 16.4)
+    c.putalpha(Image.fromarray((m * 255).astype(np.uint8)).resize((2*r, 2*r), Image.LANCZOS)); c.save(f'{O}/{name}.png')
+L37.crop((121, 735, 245, 859)).save(f'{O}/ch_place_photo.jpg', quality=93)

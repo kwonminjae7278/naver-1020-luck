@@ -42,6 +42,8 @@ used = set(re.findall(r'__img_([a-z0-9_]+?)__', h))
 missing = used - set(files); assert not missing, missing
 uris = {n: data_uri(n, files[n]) for n in used}
 h = re.sub(r'__img_([a-z0-9_]+?)__', lambda m: uris[m.group(1)], h)
+for n in set(re.findall(r'__font_([a-z0-9_-]+?)__', h)):   # 폰트 (make_fonts.py로 만든 부분 서브셋)
+    h = h.replace(f'__font_{n}__', 'data:font/woff2;base64,' + base64.b64encode(open(f'{d}/fonts/{n}.woff2', 'rb').read()).decode())
 for n in set(re.findall(r'__snd_([a-z0-9_]+?)__', h)):   # 사운드
     h = h.replace(f'__snd_{n}__', 'data:audio/mp4;base64,' + base64.b64encode(open(f'{d}/snd/{n}.m4a', 'rb').read()).decode())
 # Claude 아티팩트용: 문서 머리말 없이 (뷰어가 붙여 줌)

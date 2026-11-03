@@ -2,6 +2,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,800..900&display=swap" />
 <style>
+  @font-face { font-family: "Pretendard"; font-weight: 500; font-display: block; src: url(__font_pretendard-medium__) format("woff2"); }
+  @font-face { font-family: "Pretendard"; font-weight: 600; font-display: block; src: url(__font_pretendard-semibold__) format("woff2"); }
+  @font-face { font-family: "Pretendard"; font-weight: 700; font-display: block; src: url(__font_pretendard-bold__) format("woff2"); }
   /* 단일 다크 테마: 앱 화면 프로토타입 */
   :root {
     color-scheme: dark;
@@ -74,6 +77,11 @@
   #frScroll::-webkit-scrollbar { display: none; }
   #frScroll.dragging { cursor: grabbing; }
   .fr-content { position: relative; width: 402px; height: 854px; }
+  /* 작은 글자는 HTML로 다시 그림 (배경색으로 이미지 글자를 덮음) */
+  .fr-text { position: absolute; background: #0e0e0e; color: #ececec; font-family: "Pretendard", -apple-system, sans-serif;
+             font-size: 14.5px; font-weight: 500; letter-spacing: -.35px; line-height: 24px; pointer-events: none; }
+  .fr-head-t { position: absolute; left: 140px; top: 64px; width: 122px; height: 34px; background: #0e0e0e; color: #fff; text-align: center;
+               font-family: "Pretendard", -apple-system, sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -.4px; line-height: 34px; pointer-events: none; }
   .fr-content > img { display: block; width: 402px; height: 854px; pointer-events: none; }
   /* Lucky Moments: 가로 스크롤 (시안 세 장을 이어 붙인 띠, 최대 480px) */
   #frRow { position: absolute; left: 0; top: 562px; width: 402px; height: 274px; overflow-x: auto; overflow-y: hidden;
@@ -94,19 +102,65 @@
   .ch-thread { position: relative; width: 402px; height: 1025px; transition: height .4s var(--ease); }
   .mode-b .ch-thread { margin-top: -548px; }          /* 운세 겹쳐보기 대화(B)부터 시작 */
   .mode-b .ch-thread > img.thread-a { visibility: hidden; }
-  .ch-thread > img { position: absolute; display: block; pointer-events: none; }
-  .ch-thread > img.nm { opacity: 0; transform: translateY(14px) scale(.96); transition: opacity .35s var(--ease), transform .5s var(--spring); }
-  .ch-thread > img.nm.me { transform-origin: 100% 100%; } .ch-thread > img.nm.you { transform-origin: 0 100%; }
-  .ch-thread > img.nm.show { opacity: 1; transform: none; }
-  #mixBubble:active { background: rgba(0,0,0,.08); }
+  /* ── 채팅: 텍스트·말풍선은 HTML로 (어떤 해상도에서도 선명) ── */
+  #scr-chat { font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; }
+  .ch-thread .bub, .ch-thread .nm-name, .ch-thread .av, .ch-thread .placecard, .ch-thread .mixcard { position: absolute; }
+  .bub { height: 40px; padding: 0 14px; display: flex; align-items: center; white-space: nowrap; border-radius: 20px;
+         font-size: 15px; font-weight: 500; letter-spacing: -.35px; line-height: 1; }
+  .bub.two { height: 67px; padding: 0 14px; border-radius: 20px; line-height: 23.5px; display: block; padding-top: 10px; }
+  .bub.you { left: 68px; background: #121212; color: #fff; }
+  .bub.me { right: 20px; background: #FFA1F9; color: #111; }
+  .nm-name { left: 69px; font-size: 12.5px; font-weight: 500; color: #3a3a3a; letter-spacing: -.1px; line-height: 15px; }
+  .av { left: 19px; width: 42px; height: 42px; pointer-events: none; }
+  .mixcard { left: 68px; width: 269px; height: 99px; border-radius: 22px; background: #121212; cursor: pointer;
+             transition: transform .4s var(--spring); }
+  .mixcard:active { transform: scale(.97); transition: transform .12s; }
+  .mixcard img { position: absolute; left: 14px; top: 10px; width: 112px; height: 37px; }
+  .mixcard span { position: absolute; left: 20px; top: 56px; color: #fff; font-size: 13.5px; font-weight: 500; letter-spacing: -.3px; }
+  .mix-go { position: absolute; right: 12px; bottom: 12px; width: 36px; height: 36px; border-radius: 50%; background: #fff; display: grid; place-items: center; }
+  .placecard { right: 20px; width: 268px; height: 138px; border-radius: 22px; background: #5EFFC7; }
+  .placecard img { position: absolute; left: 7px; top: 7px; width: 124px; height: 124px; border-radius: 16px; object-fit: cover; }
+  .pc-tag { position: absolute; left: 144px; top: 13px; font-family: "Archivo", "Arial Narrow", sans-serif; font-stretch: 70%;
+            font-weight: 800; font-size: 15px; letter-spacing: -.4px; color: #3f8f73; }
+  .placecard strong { position: absolute; left: 144px; top: 38px; font-size: 18px; font-weight: 700; color: #111; letter-spacing: -.5px; }
+  .pc-btn { position: absolute; left: 140px; top: 95px; width: 117px; height: 35px; border-radius: 18px; background: #121212; color: #fff;
+            display: grid; place-items: center; font-size: 14px; font-weight: 600; letter-spacing: -.3px; }
+  .mode-b .ch-thread > .thread-a { visibility: hidden; }
+  .ch-thread > .nm { position: absolute; inset: 0 auto auto 0; width: 402px; opacity: 0; transform: translateY(14px) scale(.96);
+                     transition: opacity .35s var(--ease), transform .5s var(--spring); pointer-events: none; }
+  .ch-thread > .nm.me { transform-origin: 100% 0; } .ch-thread > .nm.you { transform-origin: 0 0; }
+  .ch-thread > .nm.show { opacity: 1; transform: none; }
+  /* 상단: 상태바 · 제목 · 칩 · 순위 바 */
+  #chHead .ch-status { position: absolute; left: 0; top: 0; width: 402px; height: 54px; display: flex; align-items: center;
+                       justify-content: space-between; padding: 6px 30px 0 46px; font-size: 17px; font-weight: 600; color: #111; }
+  .ch-status .icons { display: flex; gap: 6px; align-items: center; }
+  .ch-back { position: absolute; left: 21px; top: 67px; }
+  .ch-title { position: absolute; left: 0; top: 64px; width: 402px; text-align: center; font-size: 20px; font-weight: 600; letter-spacing: -.6px; color: #111; line-height: 32px; }
+  .ch-title svg { vertical-align: -2px; } .ch-title em { font-style: normal; color: #b8b8bd; font-weight: 500; margin-left: 2px; }
+  .ch-chips { position: absolute; left: 20px; top: 130px; display: flex; gap: 9px; white-space: nowrap; }
+  .ch-chips span { height: 42px; padding: 0 23px; border-radius: 21px; background: #fff; color: #505055; font-size: 15px; font-weight: 500;
+                   letter-spacing: -.4px; display: flex; align-items: center; transition: background .3s var(--ease), color .3s var(--ease); }
+  .ranked .ch-chips .chip-rank { background: #FE39C7; color: #fff; }
+  .rk-row { position: absolute; left: 0; top: 198px; display: flex; }
+  .rk { width: 80px; padding-left: 27px; position: relative; }
+  .rk:first-child { margin-left: 0; }
+  .rk img { width: 62px; height: 62px; display: block; }
+  .rk b { display: block; width: 62px; text-align: center; margin-top: 6px; font-size: 13px; font-weight: 600; color: #111; letter-spacing: -.2px; }
+  /* 입력창 */
+  #chInput { position: absolute; left: 0; top: 760px; width: 402px; height: 114px;
+             background: linear-gradient(rgba(251,251,251,0), #F7F7F9 30%, #EFF0F4 64%); }
+  .ci-plus { position: absolute; left: 24px; top: 20px; width: 44px; height: 44px; border-radius: 50%; background: #fff; display: grid; place-items: center; }
+  .ci-field { position: absolute; left: 76px; top: 18px; width: 302px; height: 48px; border-radius: 24px; background: #fff;
+              padding-left: 17px; display: flex; align-items: center; font-size: 15px; color: #b5b5ba; letter-spacing: -.3px; }
+  .ci-send { position: absolute; right: 7px; top: 6px; width: 36px; height: 36px; border-radius: 50%; background: #111; display: grid; place-items: center; }
+  .ci-bar { position: absolute; left: 134px; bottom: 9px; width: 134px; height: 5px; border-radius: 3px; background: #111; }
+  
   #chFade { position: absolute; left: 0; top: 728px; width: 402px; height: 40px; pointer-events: none;
             background: linear-gradient(rgba(255,255,255,0), #fff); }
-  #chPanel { position: absolute; left: 0; top: 0; width: 402px; height: 190px; overflow: hidden; background: rgb(239,240,244);
+  #chPanel { position: absolute; left: 0; top: 0; width: 402px; height: 186px; overflow: hidden; background: rgb(239,240,244);
              border-radius: 0 0 26px 26px; transition: height .55s var(--ease); }
-  #chPanel img { display: block; width: 402px; height: 300px; }
   .ranked #chPanel { height: 300px; }
-  #chHead { position: absolute; left: 0; top: 0; width: 402px; height: 178px; transition: opacity .2s var(--ease) .35s; }
-  .ranked #chHead { opacity: 0; transition-delay: 0s; }
+  #chHead { position: absolute; left: 0; top: 0; width: 402px; height: 178px; pointer-events: none; }
   #chChip { left: 152px; top: 124px; width: 136px; height: 52px; border-radius: 26px; }
   #chMixChip { border-radius: 26px 0 0 26px; }
   #chChip:active { background: rgba(0,0,0,.06); }
@@ -334,6 +388,7 @@
     <div id="frScroll">
       <div class="fr-content">
         <img src="__img_fr_strip__" alt="Lucky Talk, Lucky Moments" draggable="false">
+        <div class="fr-text" style="left:16px;top:79px;width:260px;height:24px">친구들과 운세를 보며 이야기를 나눠봐요</div>
         <div class="hot" id="luckyTalk" style="left:0;top:10px;width:402px;height:100px" aria-label="Lucky Talk"></div>
         <div class="hot" id="luckyTalkCard" style="left:18px;top:125px;width:366px;height:325px" aria-label="행운 공구방"></div>
         <div id="frRow"><img src="__img_fr_row__" alt="Lucky Moments" draggable="false"></div>
@@ -341,6 +396,7 @@
       <div class="fr-pad"></div>
     </div>
     <img class="abs" src="__img_fr_head__" style="left:0;top:0;width:402px;height:104px" alt="친구방">
+    <div class="fr-head-t">친구방</div>
     <img class="abs" src="__img_fr_nav__" style="left:0;top:780px;width:402px;height:94px" alt="">
     <div class="hot tab" data-tab="home" style="left:12px;top:782px;width:92px;height:66px" aria-label="홈"></div>
     <div class="hot tab" data-tab="friends" style="left:198px;top:782px;width:92px;height:66px" aria-label="친구방"></div>
@@ -526,21 +582,63 @@
     <div id="chMsgs">
       <div class="ch-spacer"></div>
       <div class="ch-thread" id="chThread">
-        <img class="thread-a" src="__img_ch_msgs__" style="left:0;top:0;width:402px;height:581px" alt="대화: 시험 운세 1등">
-        <img src="__img_ch_msgs2__" style="left:0;top:548px;width:402px;height:477px" alt="대화: 내일 날씨, Lucky mix">
-        <div class="hot" id="mixBubble" style="left:66px;top:908px;width:274px;height:104px;border-radius:22px" aria-label="Lucky mix 겹치는 운세 확인하기"></div>
-          <img class="nm me" data-bottom="1073" src="__img_nm_1__" style="left:168px;top:1027px;width:220px;height:46px" alt="">
-          <img class="nm me" data-bottom="1223" src="__img_nm_place__" style="left:108px;top:1075px;width:282px;height:148px" alt="">
-          <img class="nm me" data-bottom="1271" src="__img_nm_3__" style="left:172px;top:1223px;width:216px;height:48px" alt="">
-          <img class="nm you" data-bottom="1365" src="__img_nm_4__" style="left:12px;top:1295px;width:280px;height:70px" alt="">
-          <img class="nm you" data-bottom="1433" src="__img_nm_5__" style="left:12px;top:1365px;width:210px;height:68px" alt="">
-          <img class="nm you" data-bottom="1481" src="__img_nm_6__" style="left:60px;top:1433px;width:182px;height:48px" alt="">
+<div class="nm-name thread-a" style="top:18px">Dayun</div><img class="av thread-a" src="__img_av_dayun__" style="top:37px" alt="">
+<div class="bub you two thread-a" style="top:37px">헐 ㄹㅈㄷ 수민이 오늘 시험인데<br>운세 1등 뜸ㅋㅋㅋㅋ</div>
+<div class="bub you thread-a" style="top:110px">이 정도면 합격 스포아님?</div>
+<div class="bub me thread-a" style="top:169px">아 뭐야 나 꼴등임</div>
+<div class="bub me thread-a" style="top:215px">진심 멘헤라될것같아</div>
+<div class="nm-name thread-a" style="top:264px">Sumin</div><img class="av thread-a" src="__img_av_sumin__" style="top:283px" alt="">
+<div class="bub you thread-a" style="top:283px">아싸 오늘 운빨 미쳤다</div>
+<div class="bub you thread-a" style="top:329px">언니가 부적 쏜다 다들 받아가</div>
+<div class="bub me thread-a" style="top:389px">제발요 제발저요 저 아니면 안돼요</div>
+<div class="bub me thread-a" style="top:434px">나 오늘 발푠데 실력 밤티임ㅠ</div>
+<div class="nm-name thread-a" style="top:477px">Sumin</div><img class="av thread-a" src="__img_av_sumin__" style="top:496px" alt="">
+<div class="bub you thread-a" style="top:496px">기달기달 기운풀충전해서 보내줄게</div>
+<div class="nm-name" style="top:562px">dayun</div><img class="av" src="__img_av_dayun__" style="top:581px" alt="">
+<div class="bub you" style="top:581px">님들 내일 날씨 야르네</div>
+<div class="bub you" style="top:627px">접선하실?</div>
+<div class="bub me" style="top:687px">ㅇㅇㅇ 개좋지</div>
+<div class="bub me" style="top:735px">어디가지 성수? 용산?</div>
+<div class="nm-name" style="top:798px">sumin</div><img class="av" src="__img_av_sumin__" style="top:817px" alt="">
+<div class="bub you" style="top:817px">에 진짜 날씨 야르링이네</div>
+<div class="bub you" style="top:864px">기달려봐 운세한테 코스 맡겨봄</div>
+<div class="mixcard" id="mixBubble" role="button" aria-label="Lucky mix 겹치는 운세 확인하기" style="top:911px">
+          <img src="__img_ch_mix_logo__" alt="Lucky mix"><span>겹치는 운세 확인하기</span>
+          <i class="mix-go"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>
+        </div>
+<div class="nm me" data-bottom="1070"><div class="bub me" style="top:1030px">오 누울 자리까지 정해줌 아자스</div></div>
+<div class="nm me" data-bottom="1219"><div class="placecard" style="top:1081px">
+          <img src="__img_ch_place_photo__" alt="마포 한강공원">
+          <b class="pc-tag">Lucky place</b><strong>마포 한강공원</strong><span class="pc-btn">길 찾기</span>
+        </div></div>
+<div class="nm me" data-bottom="1268"><div class="bub me" style="top:1228px">한강 야르다ㅋㅋㅋ 낼 여기 ㄱ?</div></div>
+<div class="nm you" data-bottom="1359"><div class="nm-name" style="top:1300px">dayun</div><img class="av" src="__img_av_dayun__" style="top:1319px" alt=""><div class="bub you" style="top:1319px">기운 받으면서 엽떡먹방 드가자</div></div>
+<div class="nm you" data-bottom="1428"><div class="nm-name" style="top:1369px">sumin</div><img class="av" src="__img_av_sumin__" style="top:1388px" alt=""><div class="bub you" style="top:1388px">나도 좋아 케케크룽</div></div>
+<div class="nm you" data-bottom="1476"><div class="bub you" style="top:1436px">내일 마포에서 봐 ~~!~!</div></div>
       </div>
     </div>
     <div id="chFade"></div>
-    <div id="chPanel"><img src="__img_ch_panel__" alt="순위: Sumin 1, Dayun 2, Yujin 3"></div>
-    <img id="chHead" src="__img_ch_head__" alt="행운 공구방">
-    <img class="abs" src="__img_ch_input__" style="left:0;top:760px;width:402px;height:114px" alt="메시지 입력">
+    <div id="chPanel">
+      <div class="rk-row">
+        <div class="rk"><img src="__img_rk_av1__" alt=""><b>Sumin</b></div>
+        <div class="rk"><img src="__img_rk_av2__" alt=""><b>Dayun</b></div>
+        <div class="rk"><img src="__img_rk_av3__" alt=""><b>Yujin</b></div>
+      </div>
+    </div>
+    <div id="chHead">
+      <div class="ch-status"><span>9:41</span><span class="icons">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="#111"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="#111"><path d="M8 2.6c2.3 0 4.4.9 6 2.4l1.2-1.2A10.2 10.2 0 0 0 8 .9 10.2 10.2 0 0 0 .8 3.8L2 5c1.6-1.5 3.7-2.4 6-2.4Zm0 3.4c1.4 0 2.6.5 3.6 1.4l1.2-1.2A6.8 6.8 0 0 0 8 4.3a6.8 6.8 0 0 0-4.8 1.9l1.2 1.2C5.4 6.5 6.6 6 8 6Zm0 3.3c-.6 0-1.1.2-1.4.6L8 11.3l1.4-1.4c-.3-.4-.8-.6-1.4-.6Z"/></svg>
+        <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="#111" opacity=".35"/><rect x="2" y="2" width="20" height="9" rx="2" fill="#111"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" fill="#111" opacity=".4"/></svg></span></div>
+      <svg class="ch-back" viewBox="0 0 24 24" width="26" height="26"><path d="M15 4 7 12l8 8" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="ch-title">행운 공구방 <svg viewBox="0 0 20 20" width="18" height="18"><g fill="#111"><circle cx="10" cy="5.2" r="3.6"/><circle cx="10" cy="14.8" r="3.6"/><circle cx="5.2" cy="10" r="3.6"/><circle cx="14.8" cy="10" r="3.6"/></g><circle cx="10" cy="10" r="1.4" fill="#EFF0F4"/></svg> <em>3</em></div>
+      <div class="ch-chips"><span>기운 선물하기</span><span class="chip-rank">운세 순위 비교</span><span>운세 겹쳐보기</span></div>
+    </div>
+    <div id="chInput">
+      <i class="ci-plus"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 5v14M5 12h14" stroke="#9a9a9a" stroke-width="1.6" stroke-linecap="round"/></svg></i>
+      <div class="ci-field">메시지를 남겨보세요<i class="ci-send"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 19V5M6 11l6-6 6 6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i></div>
+      <i class="ci-bar"></i>
+    </div>
     <div class="hot" id="chChip" role="button" aria-label="운세 순위 비교"></div>
     <div class="hot" id="chMixChip" role="button" aria-label="운세 겹쳐보기" style="left:298px;top:124px;width:104px;height:52px"></div>
     <div class="hot back" style="left:0;top:56px;width:64px;height:50px" aria-label="뒤로"></div>
