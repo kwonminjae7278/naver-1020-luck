@@ -630,11 +630,9 @@ function go(state) {
   const add = { clear: ["s-clear"], fortune: ["s-clear", "s-fortune"], home: ["s-clear", "s-fortune", "s-home"] }[state] || [];
   phone.classList.add(...add);
 }
-// 오늘의 운세는 하루에 한 번: 오늘 이미 봤으면 홈_기본에서 시작
-const TODAY_KEY = "fortune-seen-" + new Date().toDateString();
+// 페이지를 열 때는 항상 오늘의운세_딤1부터. 한 번 본 뒤 '처음부터'를 누르면 홈_기본에서 시작 (오늘의 운세는 하루 한 번)
 let fortuneSeen = false;
-try { fortuneSeen = localStorage.getItem(TODAY_KEY) === "1"; } catch (e) {}
-function markFortuneSeen() { fortuneSeen = true; try { localStorage.setItem(TODAY_KEY, "1"); } catch (e) {} }
+function markFortuneSeen() { fortuneSeen = true; }
 function start(forceFortune) {
   clearTimeout(timer);
   phone.classList.add("no-anim");
