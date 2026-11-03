@@ -621,3 +621,95 @@ for _ in range(60):
         acc += np.roll(np.roll(filled * known[..., None], dy, 0), dx, 1); cnt += np.roll(np.roll(known, dy, 0), dx, 1)
     grow = ~known & (cnt > 0); filled[grow] = acc[grow] / cnt[grow, None]; known |= grow
 Image.fromarray(filled.clip(0, 255).astype(np.uint8)).save(f'{O}/cam_photo.jpg', quality=93)
+
+# ═════════ 도형 윤곽을 수식(슈퍼타원)으로 맞춰 완전히 매끄럽게 + 딤1·딤2 같은 윤곽 ═════════
+def fit_superellipse(ds, hws, A, B):
+    """반폭 프로필(가장자리에서 거리 d → 반폭)에 맞는 모서리 곡선 지수 n을 찾음. |x/A|^n + |y/B|^n = 1"""
+    best = None
+    for n in np.arange(2.0, 8.01, .05):
+        y = B - ds; pred = A * np.clip(1 - np.abs(y / B) ** n, 0, 1) ** (1 / n)
+        err = np.mean((pred - hws) ** 2)
+        if best is None or err < best[0]: best = (err, n)
+    return best
+def shape_alpha(box, CX, CY, A, B, n, K=3, SS=4):
+    W3, H3 = (box[2] - box[0]) * K, (box[3] - box[1]) * K
+    yy, xx = np.mgrid[0:H3 * SS, 0:W3 * SS]
+    py = box[1] + (yy + .5) / (K * SS); px = box[0] + (xx + .5) / (K * SS)
+    inside = (np.abs((px - CX) / A) ** n + np.abs((py - CY) / B) ** n) <= 1
+    return np.asarray(Image.fromarray((inside * 255).astype(np.uint8)).resize((W3, H3), Image.LANCZOS)).astype(float) / 255
+
+# 카드 (딤2 기준): 왼쪽 윤곽 프로필로 지수 맞추기
+Am, Bm = (351.0 - 61.75) / 2, (BOTm - TOPm) / 2; CYm = (TOPm + BOTm) / 2
+errm, nm = fit_superellipse(dsm, hwm, Am, Bm)
+print('card superellipse n', round(nm, 2), 'rmse', round(errm ** .5, 2))
+K = 3; FULL = (0, 0, 402, 874)
+am = shape_alpha(FULL, CXm, CYm, Am, Bm, nm)                 # 3배 전체 화면 크기 마스크
+up = lambda arr: np.asarray(Image.fromarray(arr.clip(0, 255).astype(np.uint8)).resize((402 * K, 874 * K), Image.LANCZOS)).astype(float)
+def edge_extend(img, known, iters=12):
+    f = img.copy(); kn = known.copy()
+    for _ in range(iters):
+        acc = np.zeros_like(f); cnt = np.zeros(kn.shape)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            acc += np.roll(np.roll(f * kn[..., None], dy, 0), dx, 1); cnt += np.roll(np.roll(kn, dy, 0), dx, 1)
+        g = ~kn & (cnt > 0); f[g] = acc[g] / cnt[g, None]; kn |= g
+    return f
+# 1배 좌표의 카드 안쪽(조금 안으로) 영역
+yy1, xx1 = np.mgrid[0:874, 0:402]
+inner = (np.abs((xx1 + .5 - CXm) / (Am - 3)) ** nm + np.abs((yy1 + .5 - CYm) / (Bm - 3)) ** nm) <= 1
+outer = (np.abs((xx1 + .5 - CXm) / (Am + 4)) ** nm + np.abs((yy1 + .5 - CYm) / (Bm + 4)) ** nm) <= 1
+# 배경: 카드 주변 띠는 바깥 배경에서 매끄럽게 채움 (원래 카드의 민트 가장자리 제거)
+bgc = harmonic_fill(cleanB.copy(), outer, iters=900)
+sharp = edge_extend(cleanB, inner)                           # 선명한 카드 내용
+sh = np.roll(A62, 5, axis=1)                                 # 흐린 카드: 5px 오른쪽으로 옮겨 딤2와 정렬
+blur = edge_extend(sh, inner)
+bg3, sh3, bl3, a3 = up(bgc), up(sharp), up(blur), am[..., None]
+Image.fromarray((bg3 * (1 - a3) + bl3 * a3).clip(0, 255).astype(np.uint8)).save(f'{O}/dim1_full.jpg', quality=93)
+Image.fromarray((bg3 * (1 - a3) + sh3 * a3).clip(0, 255).astype(np.uint8)).save(f'{O}/dim2_clean.jpg', quality=93)
+# 운세 화면으로 이어지는 카드도 같은 윤곽
+MB = (60, 228, 353, 576)
+cardc = Image.fromarray(sh3[MB[1] * K:MB[3] * K, MB[0] * K:MB[2] * K].clip(0, 255).astype(np.uint8))
+cardc.putalpha(Image.fromarray((am[MB[1] * K:MB[3] * K, MB[0] * K:MB[2] * K] * 255).astype(np.uint8))); cardc.save(f'{O}/modal_card.png')
+
+# 카메라 뷰파인더도 수식 곡선으로
+# 왼쪽은 사진 속 어두운 물체 때문에 윤곽이 흔들림 → 깨끗한 오른쪽 윤곽만으로 측정 (좌우 대칭)
+rd, rh = [], []
+for y, (l, r) in prof16.items():
+    d = min(y - TOPv, BOTv - y)
+    if d < 95: rd.append(d); rh.append(r + .25 - CXv)
+o = np.argsort(rd); ud = np.array(rd)[o]; uh = np.maximum.accumulate(np.array(rh)[o])
+Av, Bv = uh.max(), (BOTv - TOPv) / 2; CYv = (TOPv + BOTv) / 2
+errv, nv = fit_superellipse(ud, uh, Av, Bv)
+print('viewfinder superellipse n', round(nv, 2), 'rmse', round(errv ** .5, 2))
+av = shape_alpha(vb, CXv, CYv, Av, Bv, nv)
+mk = Image.new('RGBA', (av.shape[1], av.shape[0]), (0, 0, 0, 0)); mk.putalpha(Image.fromarray((av * 255).astype(np.uint8))); mk.save(f'{O}/cam_mask.png')
+
+# 더 정확한 모델: 직선 변 + 모서리만 둥근 사각형 (모서리 반경 R, 곡률 지수 n)
+def fit_rrect(ds, hws, A):
+    best = None
+    for R in np.arange(30, min(A, 200), 1.0):
+        for n in np.arange(2.0, 5.01, .1):
+            t = np.clip((R - ds) / R, 0, 1)
+            pred = (A - R) + R * np.clip(1 - t ** n, 0, 1) ** (1 / n)
+            err = np.mean((pred - hws) ** 2)
+            if best is None or err < best[0]: best = (err, R, n)
+    return best
+def rrect_alpha(box, CX, CY, A, B, R, n, K=3, SS=4):
+    W3, H3 = (box[2] - box[0]) * K, (box[3] - box[1]) * K
+    yy, xx = np.mgrid[0:H3 * SS, 0:W3 * SS]
+    py = box[1] + (yy + .5) / (K * SS); px = box[0] + (xx + .5) / (K * SS)
+    dx = np.maximum(np.abs(px - CX) - (A - R), 0); dy = np.maximum(np.abs(py - CY) - (B - R), 0)
+    inside = ((dx / R) ** n + (dy / R) ** n <= 1) & (np.abs(px - CX) <= A) & (np.abs(py - CY) <= B)
+    return np.asarray(Image.fromarray((inside * 255).astype(np.uint8)).resize((W3, H3), Image.LANCZOS)).astype(float) / 255
+
+e, Rv, nv2 = fit_rrect(ud, uh, Av); print('viewfinder rrect R', Rv, 'n', round(nv2, 1), 'rmse', round(e ** .5, 2))
+av = rrect_alpha(vb, CXv, CYv, Av, Bv, Rv, nv2)
+mk = Image.new('RGBA', (av.shape[1], av.shape[0]), (0, 0, 0, 0)); mk.putalpha(Image.fromarray((av * 255).astype(np.uint8))); mk.save(f'{O}/cam_mask.png')
+
+e2, Rm, nm2 = fit_rrect(dsm, hwm, Am); print('card rrect R', Rm, 'n', round(nm2, 1), 'rmse', round(e2 ** .5, 2))
+if e2 < errm:   # 카드도 더 잘 맞으면 이 모델로 다시 그림
+    am = rrect_alpha(FULL, CXm, CYm, Am, Bm, Rm, nm2); a3 = am[..., None]
+    in1 = rrect_alpha(FULL, CXm, CYm, Am, Bm, Rm, nm2, K=1)   # (참고용)
+    Image.fromarray((bg3 * (1 - a3) + bl3 * a3).clip(0, 255).astype(np.uint8)).save(f'{O}/dim1_full.jpg', quality=93)
+    Image.fromarray((bg3 * (1 - a3) + sh3 * a3).clip(0, 255).astype(np.uint8)).save(f'{O}/dim2_clean.jpg', quality=93)
+    cardc = Image.fromarray(sh3[MB[1] * K:MB[3] * K, MB[0] * K:MB[2] * K].clip(0, 255).astype(np.uint8))
+    cardc.putalpha(Image.fromarray((am[MB[1] * K:MB[3] * K, MB[0] * K:MB[2] * K] * 255).astype(np.uint8))); cardc.save(f'{O}/modal_card.png')
