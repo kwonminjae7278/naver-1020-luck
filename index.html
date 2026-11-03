@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
 <title>오늘의 운세 프로토타입</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,800..900&display=swap" />
@@ -1163,5 +1169,9 @@ document.getElementById("collectOk").addEventListener("click", () => {
 
 document.getElementById("replay").addEventListener("click", () => start(false));
 document.getElementById("replayFortune").addEventListener("click", () => start(true));
-start(false);
+// 이미지(약 6MB)가 모두 준비된 뒤 시작 → 딤1이 확실히 보이고 블러가 걷히는 장면을 놓치지 않음
+function boot() { start(false); }
+if (document.readyState === "complete") boot(); else addEventListener("load", boot, { once: true });
 </script>
+
+</html>

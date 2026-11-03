@@ -1163,5 +1163,7 @@ document.getElementById("collectOk").addEventListener("click", () => {
 
 document.getElementById("replay").addEventListener("click", () => start(false));
 document.getElementById("replayFortune").addEventListener("click", () => start(true));
-start(false);
+// 이미지(약 6MB)가 모두 준비된 뒤 시작 → 딤1이 확실히 보이고 블러가 걷히는 장면을 놓치지 않음
+function boot() { start(false); }
+if (document.readyState === "complete") boot(); else addEventListener("load", boot, { once: true });
 </script>

@@ -13,3 +13,4 @@ yarn-error.log*
 
 # 이 프로토타입의 빌드 캐시 (build.py가 다시 만듦)
 .hq/
+artifact.html

@@ -44,4 +44,10 @@ uris = {n: data_uri(n, files[n]) for n in used}
 h = re.sub(r'__img_([a-z0-9_]+?)__', lambda m: uris[m.group(1)], h)
 for n in set(re.findall(r'__snd_([a-z0-9_]+?)__', h)):   # 사운드
     h = h.replace(f'__snd_{n}__', 'data:audio/mp4;base64,' + base64.b64encode(open(f'{d}/snd/{n}.m4a', 'rb').read()).decode())
-open(f'{d}/index.html', 'w').write(h); print(len(h) // 1024, 'KB,', len(used), 'images')
+# Claude 아티팩트용: 문서 머리말 없이 (뷰어가 붙여 줌)
+open(f'{d}/artifact.html', 'w').write(h)
+# GitHub Pages용: 완전한 HTML 문서 (doctype·문자 인코딩·뷰포트 포함 → 표준 모드로 정확히 렌더링)
+full = ('<!DOCTYPE html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+        '<meta name="theme-color" content="#050505">\n' + h + '\n</html>\n')
+open(f'{d}/index.html', 'w').write(full); print(len(h) // 1024, 'KB,', len(used), 'images')
