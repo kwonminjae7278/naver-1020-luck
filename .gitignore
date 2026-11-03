@@ -1,0 +1,15 @@
+# Next.js
+node_modules/
+.next/
+out/
+.env
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+
+# 이 프로토타입의 빌드 캐시 (build.py가 다시 만듦)
+.hq/
