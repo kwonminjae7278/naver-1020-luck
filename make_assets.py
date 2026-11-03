@@ -524,3 +524,47 @@ for name, (cx, cy, bx) in {'rk_av1': (58, 231, 72.1), 'rk_av2': (137, 231, 152.4
     m = (np.hypot(yy - r, xx - r) <= r - .3) | (np.hypot(yy - (238.4 - cy + r), xx - (bx - cx + r)) <= 16.4)
     c.putalpha(Image.fromarray((m * 255).astype(np.uint8)).resize((2*r, 2*r), Image.LANCZOS)); c.save(f'{O}/{name}.png')
 L37.crop((121, 735, 245, 859)).save(f'{O}/ch_place_photo.jpg', quality=93)
+
+# ═════════ 피드백 반영 ═════════
+L58 = L(58)
+# 운세 순위 비교_딤_0: 제목만 크게 → 위로 올라가며 딤_1로
+A58 = np.asarray(R874(L58)).astype(float)
+TB = (40, 340, 362, 432)
+hole = np.zeros(A58.shape[:2], bool); hole[TB[1]:TB[3], TB[0]:TB[2]] = True
+bg0 = harmonic_fill(A58, hole, iters=1500)
+Image.fromarray(bg0.clip(0, 255).astype(np.uint8)).save(f'{O}/rk_bg0.jpg', quality=93)
+keyed(L58, bg0, TB, thr=22, soft=40).save(f'{O}/rk_title0.png')
+
+# 오늘의운세_딤1: 흐린 카드는 파이썬에서 미리 흐리게 + 은색 기둥이 희끗하게 번지지 않도록 민트로 물들임
+mf = np.asarray(Image.open(f'{O}/modal_fill.jpg').convert('RGB')).astype(float)
+pad = 40; big = np.pad(mf, ((pad, pad), (pad, pad), (0, 0)), mode='edge')
+bl = np.asarray(Image.fromarray(big.astype(np.uint8)).filter(ImageFilter.GaussianBlur(17))).astype(float)[pad:-pad, pad:-pad]
+mint = np.array([0, 255, 195], float); lum = bl.mean(2, keepdims=True)
+gray = (bl.max(2, keepdims=True) - bl.min(2, keepdims=True)) < 60          # 무채색(은색) 부분
+bl = np.where(gray, bl * .45 + mint * .55, bl * .8 + mint * .2)
+Image.fromarray(bl.clip(0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(4)).save(f'{O}/modal_blur.jpg', quality=92)
+
+# 카메라 뷰파인더: 4배 정밀도로 윤곽 측정 → 위아래 대칭의 매끄러운 곡선으로 3배 해상도 마스크
+A16 = np.asarray(L16.resize((402 * 4, 874 * 4), Image.LANCZOS)).astype(int)
+ins16 = np.abs(A16 - 14).max(2) > 12
+vb = (18, 203, 384, 651); prof16 = {}
+for yy in range(vb[1] * 4, vb[3] * 4):
+    xs = np.nonzero(ins16[yy, vb[0] * 4:vb[2] * 4])[0]
+    if len(xs) > 40: prof16[yy / 4] = (xs.min() / 4 + vb[0], xs.max() / 4 + vb[0])
+ys = sorted(prof16); TOPv, BOTv = ys[0], ys[-1] + .25
+L_ = min(v[0] for v in prof16.values()); R_ = max(v[1] for v in prof16.values()); CXv = (L_ + R_ + .25) / 2; HWv = (R_ - L_ + .25) / 2
+ds = []; hws = []
+for y in ys:
+    d = min(y - TOPv, BOTv - y)
+    if d < 80: ds.append(d); hws.append((prof16[y][1] - prof16[y][0] + .25) / 2)
+order = np.argsort(ds); ds = np.array(ds)[order]; hws = np.maximum.accumulate(np.array(hws)[order])
+# 같은 d의 값들을 평균해 잡음 제거
+ud = np.unique(np.round(ds * 4) / 4); uh = np.array([hws[np.abs(ds - u) < .2].mean() for u in ud]); uh = np.maximum.accumulate(uh)
+print('viewfinder', TOPv, BOTv, CXv, HWv)
+K = 3; W3, H3 = (vb[2] - vb[0]) * K, (vb[3] - vb[1]) * K; SS = 4
+yy, xx = np.mgrid[0:H3 * SS, 0:W3 * SS]
+py = vb[1] + (yy + .5) / (K * SS); px = vb[0] + (xx + .5) / (K * SS)
+d = np.minimum(py - TOPv, BOTv - py); hw = np.interp(d, ud, uh, left=-1, right=HWv)
+inside = (d >= 0) & (np.abs(px - CXv) <= hw)
+al = Image.fromarray((inside * 255).astype(np.uint8)).resize((W3, H3), Image.LANCZOS)
+mk = Image.new('RGBA', (W3, H3), (0, 0, 0, 0)); mk.putalpha(al); mk.save(f'{O}/cam_mask.png')

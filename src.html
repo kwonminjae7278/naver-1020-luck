@@ -173,6 +173,15 @@
   .dim .pop { opacity: 0; transform: translateY(12px); transition: opacity .2s var(--ease), transform .2s var(--ease); }
   .dimmed #rkDim .pop, .mixing #mxDim .pop { opacity: 1; transform: none; transition: opacity .5s var(--ease), transform .7s var(--ease-out); }
 
+  /* 딤_0: 제목만 크게 등장 → 1.3초 뒤 위로 올라가며 작아지고, 1등 화면(딤_1)이 드러남 */
+  #rkTitle0 { opacity: 0; transform: scale(.9); transform-origin: 160.5px 68px; transition: opacity .2s, transform .2s; }
+  .dimmed #rkTitle0 { opacity: 1; transform: none; transition: opacity .55s var(--ease) .15s, transform .8s var(--ease-out) .15s; }
+  .dimmed.rk-reveal #rkTitle0 { opacity: 0; transform: translateY(-192px) scale(.77);
+       transition: transform .85s cubic-bezier(.65,0,.35,1), opacity .35s var(--ease) .9s; }
+  #rkBg1 { opacity: 0; transition: opacity .2s; }
+  .dimmed.rk-reveal #rkBg1 { opacity: 1; transition: opacity .55s var(--ease) .82s; }
+  #rkDim #rkOk, #rkDim #rkGift { pointer-events: none; }
+  .rk-reveal #rkDim #rkOk, .rk-reveal #rkDim #rkGift { pointer-events: auto; }
   /* 순위 딤 이모지: 위에서 떨어지는 잎처럼 좌우로 살랑이며 내려와 제자리에 앉음 */
   #rkDim .drop { opacity: 0; transform: translate3d(0, var(--y), 0) rotate(var(--r)); will-change: transform, opacity;
                  transition: opacity .2s, transform .2s; }
@@ -268,6 +277,15 @@
       linear-gradient(0deg, rgba(255,255,255,0) 0, #fff 50%, rgba(255,255,255,0) 100%) center / 1.5px 100% no-repeat;
     mix-blend-mode: screen; }
   .ev-twinkle .ev-spark { animation: twinkle 2.6s ease-in-out infinite; }
+  .ev-btns { position: absolute; left: 20px; top: 785px; width: 362px; display: flex; gap: 10px; z-index: 60; opacity: 0;
+             transform: translateY(12px); transition: opacity .3s var(--ease), transform .3s var(--ease); }
+  .ev-btns.show { opacity: 1; transform: none; transition: opacity .6s var(--ease), transform .8s var(--ease-out); }
+  #scr-evening .ev-btns.show, #scr-evening .ev-btns.show * { pointer-events: auto; }
+  .ev-btn { flex: 1; height: 55px; border: 0; border-radius: 28px; background: #f4f2f5; color: #111; cursor: pointer;
+            font-family: "Pretendard", -apple-system, sans-serif; font-size: 17px; font-weight: 600; letter-spacing: -.4px;
+            transition: transform .4s var(--spring); }
+  .ev-btn.ghost { background: #363636; color: #adadad; }
+  .ev-btn:active { transform: scale(.96); transition: transform .12s; }
   .ev-home { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: #fff; opacity: .55; z-index: 50; }
 
   /* ── 참 ─────────────────────────── */
@@ -297,11 +315,12 @@
   #modal { left: 58px; top: 225px; width: 298px; height: 355px; overflow: hidden;
            -webkit-mask: url(__img_modal_mask__) 0 0 / 100% 100%; mask: url(__img_modal_mask__) 0 0 / 100% 100%;
            transform: scale(.985); transition: transform 1.8s var(--ease); }
-  #modal img { position: absolute; inset: 0; width: 100%; height: 100%;
-               transform: scale(1.16); filter: blur(26px) saturate(.75) brightness(1.06);
-               transition: transform 1.9s var(--ease), filter 1.9s var(--ease); }
+  #modal img { position: absolute; inset: 0; width: 100%; height: 100%; transform: scale(1.08);
+               transition: transform 1.9s var(--ease), opacity 1.9s var(--ease); }
+  #modal img.sharp { opacity: 0; }
   .s-clear #modal { transform: none; }
-  .s-clear #modal img { transform: none; filter: blur(0) saturate(1) brightness(1); }
+  .s-clear #modal img { transform: none; }
+  .s-clear #modal img.sharp { opacity: 1; }
   .s-fortune #modal, .s-home #modal { visibility: hidden; }
 
   .sticker {
@@ -407,7 +426,7 @@
   <!-- 1·2. 오늘의운세_딤 / 딤2 -->
   <div class="layer" id="dim">
     <img class="abs" src="__img_dim_base__" style="left:0;top:0;width:402px;height:874px" alt="">
-    <div class="abs" id="modal"><img src="__img_modal_fill__" alt=""></div>
+    <div class="abs" id="modal"><img src="__img_modal_blur__" alt=""><img class="sharp" src="__img_modal_fill__" alt=""></div>
     <div class="sticker" aria-hidden="true"><span>OCT 19</span><br><span>SUN</span></div>
     <img class="abs reveal" id="dimX" src="__img_dim_x__" style="left:316px;top:217px;width:44px;height:44px" alt="닫기">
     <img class="abs reveal" id="dimBtn" src="__img_dim_btn__" style="left:130px;top:606px;width:142px;height:57px" alt="보러가기">
@@ -573,6 +592,10 @@
     <h1 class="ev-title" id="ev-t2"><span>오늘의 행운을 담은</span><span>나만의 키링 완성!</span></h1>
     <div id="ev-stage"></div>
     <div class="ev-keyring" id="ev-keyring"></div>
+    <div class="ev-btns" id="evBtns">
+      <button class="ev-btn ghost" id="evShare" type="button">친구에게 공유</button>
+      <button class="ev-btn" id="evHome" type="button">홈으로 가기</button>
+    </div>
     <div class="ev-home"></div>
   </div>
 
@@ -645,12 +668,14 @@
 
     <!-- 운세 순위 비교_딤: 1등 카드 등장 + 오행 이모지가 위에서 내려오며 축하 -->
     <div id="rkDim" class="dim">
-      <img class="abs" src="__img_rk_bg__" style="left:0;top:0;width:402px;height:874px" alt="오늘의 행운 담당은? 1st Sumin, 2 Dayun, 3 Yujin">
+      <img class="abs" src="__img_rk_bg0__" style="left:0;top:0;width:402px;height:874px" alt="">
+      <img class="abs" id="rkBg1" src="__img_rk_bg__" style="left:0;top:0;width:402px;height:874px" alt="오늘의 행운 담당은? 1st Sumin, 2 Dayun, 3 Yujin">
+      <img class="abs" id="rkTitle0" src="__img_rk_title0__" style="left:40px;top:340px;width:322px;height:92px" alt="행운 공구방 · 오늘의 행운 담당은?">
       <!-- 화면 속 이모지 4개만: 화면 위에서 살랑이며 내려와 제자리에 앉음 -->
-      <img class="abs drop" src="__img_rk_fire__" style="left:229px;top:66px;width:63px;height:70px;--y:-170px;--r:-28deg;--dl:.2s" alt="">
-      <img class="abs drop" src="__img_rk_gem__" style="left:30px;top:129px;width:69px;height:64px;--y:-230px;--r:24deg;--dl:.24s" alt="">
-      <img class="abs drop" src="__img_rk_leaf1__" style="left:256px;top:271px;width:54px;height:64px;--y:-380px;--r:-36deg;--dl:.28s" alt="">
-      <img class="abs drop" src="__img_rk_leaf2__" style="left:304px;top:300px;width:64px;height:74px;--y:-410px;--r:30deg;--dl:.32s" alt="">
+      <img class="abs drop" src="__img_rk_fire__" style="left:229px;top:66px;width:63px;height:70px;--y:-170px;--r:-28deg;--dl:1.75s" alt="">
+      <img class="abs drop" src="__img_rk_gem__" style="left:30px;top:129px;width:69px;height:64px;--y:-230px;--r:24deg;--dl:1.79s" alt="">
+      <img class="abs drop" src="__img_rk_leaf1__" style="left:256px;top:271px;width:54px;height:64px;--y:-380px;--r:-36deg;--dl:1.83s" alt="">
+      <img class="abs drop" src="__img_rk_leaf2__" style="left:304px;top:300px;width:64px;height:74px;--y:-410px;--r:30deg;--dl:1.87s" alt="">
       <div class="hot" id="rkOk" style="left:18px;top:782px;width:182px;height:60px" aria-label="확인"></div>
       <div class="hot press" id="rkGift" style="left:204px;top:782px;width:182px;height:60px" aria-label="기운 선물하기"></div>
     </div>
@@ -882,7 +907,7 @@ let rankSeen = false, chatTimers = [];
 function resetChat() {
   chatTimers.forEach(clearTimeout); chatTimers = [];
   chat.classList.add("no-anim");
-  chat.classList.remove("ranked", "dimmed", "mixing", "spread", "mode-b");
+  chat.classList.remove("ranked", "dimmed", "rk-reveal", "mixing", "spread", "mode-b");
   chat.querySelectorAll(".nm.show").forEach(m => m.classList.remove("show"));
   chThread.style.height = THREAD_H + "px"; chMsgs.scrollTop = 0; rankSeen = false;
   void chat.offsetWidth; chat.classList.remove("no-anim");
@@ -901,10 +926,13 @@ document.getElementById("chChip").addEventListener("click", () => {
   if (busy || stack[stack.length - 1] !== "chat" || chat.classList.contains("mixing")) return;
   if (chat.classList.contains("ranked")) chat.classList.remove("ranked");
   else if (rankSeen) chat.classList.add("ranked");
-  else { celebrate(); chat.classList.add("dimmed"); }
+  else {
+    chat.classList.remove("rk-reveal"); chat.classList.add("dimmed");
+    chatTimers.push(setTimeout(() => chat.classList.add("rk-reveal"), 1350));
+  }
 });
 document.getElementById("rkOk").addEventListener("click", () => {
-  rankSeen = true; chat.classList.remove("dimmed");
+  rankSeen = true; chat.classList.remove("dimmed", "rk-reveal");
   setTimeout(() => chat.classList.add("ranked"), 220);   // 딤이 걷히는 동안 순위 바가 내려옴
 });
 
@@ -1235,6 +1263,7 @@ document.getElementById("collectOk").addEventListener("click", () => {
       textState(el, kin * (1 - kout), kout > 0 ? -1 : 1);
     });
     t2.forEach((el, i) => textState(el, ease.inOutCubic(seg(t, T.t2InA + i * 140, T.t2InB + i * 140)), 1));
+    evBtns.classList.toggle("show", t > T.t2InB + 300);
     root.style.background = mixColor([18, 18, 18], [9, 7, 7], ease.inOutSine(seg(t, T.spinA, T.ringB)));
     keyring.classList.toggle("ev-twinkle", t > T.sheenA);
   }
@@ -1254,11 +1283,18 @@ document.getElementById("collectOk").addEventListener("click", () => {
     } else { keyring.style.opacity = 0; simT = 0; }
     raf = requestAnimationFrame(frame);
   }
+  const evBtns = document.getElementById("evBtns");
   window.evStart = () => { cancelAnimationFrame(raf); start = performance.now() + 500; simT = 0; sndPlayed = false; raf = requestAnimationFrame(frame); };
   window.evStop = () => { cancelAnimationFrame(raf); stopKeyringSound(); };
   renderOrbit(-1); renderChrome(-1);
 })();
 
+// 키링 '홈으로 가기' → 맨 처음 화면(오늘의운세_딤1)부터
+document.getElementById("evHome").addEventListener("click", () => {
+  if (stack[stack.length - 1] !== "evening") return;
+  window.evStop(); start(true);
+});
+document.getElementById("evShare").addEventListener("click", () => {});
 document.getElementById("replay").addEventListener("click", () => start(false));
 document.getElementById("replayFortune").addEventListener("click", () => start(true));
 // 이미지(약 6MB)가 모두 준비된 뒤 시작 → 딤1이 확실히 보이고 블러가 걷히는 장면을 놓치지 않음

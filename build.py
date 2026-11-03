@@ -11,17 +11,27 @@ def factor(name):
     if name.startswith('el_') or name == 'f_card': return 1   # 이미 고해상도로 만든 이미지
     return SCALE
 
+PHOTO = ('col_', 'ev_part_', 'el_', 'cam_photo', 'ch_place_photo', 'av_', 'rk_av', 'place_link', 'music_link', 'shop', 'modal_')
+def flatten_dark(im):
+    # 화면 배경(#0e0e0e) 근처의 어두운 잡티를 정확히 배경색으로 → 확대·선명화 때 사각 테두리·희끗한 점이 생기지 않음
+    import numpy as np
+    a = np.asarray(im).copy(); rgb = a[..., :3].astype(int)
+    near = (np.abs(rgb - 14).max(-1) <= 7)
+    a[..., :3][near] = 14
+    return Image.fromarray(a, im.mode)
+
 def upscale(path, name):
     im = Image.open(path); f = factor(name)
     alpha = im.mode in ('RGBA', 'LA', 'P') and 'A' in im.convert('RGBA').getbands()
     im = im.convert('RGBA') if alpha else im.convert('RGB')
+    if not name.startswith(PHOTO): im = flatten_dark(im)
     if f != 1:
         size = (round(im.width * f), round(im.height * f))
         if alpha:   # 미리곱한 알파로 확대 → 가장자리 어두운 테두리 없음
             im = im.convert('RGBa').resize(size, Image.LANCZOS).convert('RGBA')
         else:
             im = im.resize(size, Image.LANCZOS)
-        rgb = im.convert('RGB').filter(ImageFilter.UnsharpMask(radius=2.4, percent=70, threshold=1))
+        rgb = im.convert('RGB').filter(ImageFilter.UnsharpMask(radius=2.4, percent=70, threshold=4))
         if alpha: rgb.putalpha(im.getchannel('A')); im = rgb
         else: im = rgb
     return im, alpha
