@@ -4,7 +4,7 @@
 오늘의 운세 → 홈 → Lucky Item·Place·Music → 행운 담기(촬영·참) → 모아보기 → 저녁 키링,
 친구방(Lucky Talk · 운세 순위 비교 · 운세 겹쳐보기)까지 눌러 볼 수 있어요.
 
-**바로 보기:** https://kwonminjae7278.github.io/naver-1020-luck/
+**바로 보기:** https://naver-1020-luck-team.github.io/naver-1020-luck/
 (`main`에 올라간 내용이 1~2분 뒤 자동 반영돼요. 안 바뀌어 보이면 Cmd + Shift + R)
 
 ## 폴더 구성
@@ -28,7 +28,7 @@
 
 ### 2. 컴퓨터에서 수정 (권장)
 ```bash
-git clone https://github.com/kwonminjae7278/naver-1020-luck.git
+git clone https://github.com/naver-1020-luck-team/naver-1020-luck.git
 cd naver-1020-luck
 pip install pillow numpy          # 처음 한 번
 # src.html 수정 후

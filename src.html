@@ -69,6 +69,9 @@
   .push.on .d-hero { transition-delay: .2s; } .push.on .d-body { transition-delay: .32s; }
   .push.on .d-icons { transition-delay: .4s; } .push.on .d-btn { transition-delay: .48s; }
   .hot { position: absolute; cursor: pointer; }
+  #freqLayer { z-index: 40; background: #121212; opacity: 0; visibility: hidden; transition: opacity .22s var(--ease), visibility 0s linear .22s; }
+  .tab-freq #freqLayer { opacity: 1; visibility: visible; transition: opacity .22s var(--ease), visibility 0s; }
+  #freqFrame { position: absolute; inset: 0; width: 402px; height: 874px; border: 0; display: block; background: #121212; }
   /* ── 친구방 ── */
   #friends { background: #0e0e0e; opacity: 0; visibility: hidden; transition: opacity .25s var(--ease), visibility 0s linear .25s; }
   .tab-friends #friends { opacity: 1; visibility: visible; transition: opacity .25s var(--ease), visibility 0s; }
@@ -88,6 +91,10 @@
            scrollbar-width: none; overscroll-behavior-x: contain; background: #0e0e0e; }
   #frRow::-webkit-scrollbar { display: none; }
   #frRow img { display: block; width: 882px; height: 274px; pointer-events: none; }
+  .fr-row-in { position: relative; width: 882px; height: 274px; }
+  .moment-hot { position: absolute; top: 0; width: 160px; height: 274px; border: 0; padding: 0; background: transparent; cursor: pointer;
+                border-radius: 28px; transition: transform .4s var(--spring); }
+  .moment-hot:active { transform: scale(.97); transition: transform .12s; }
   #luckyTalk, #luckyTalkCard { border-radius: 40px; transition: transform .4s var(--spring); }
   #luckyTalkCard:active { transform: scale(.98); }
 
@@ -351,7 +358,7 @@
   /* ── 오늘의운세_화면 ───────────────── */
   #fortune { pointer-events: none; transition: transform .65s var(--ease); }
   .s-fortune #fortune { pointer-events: auto; cursor: pointer; }
-  .s-home #fortune { transform: translateY(100%); }
+  .s-home #fortune { transform: translateY(100%); visibility: hidden; transition: transform .65s var(--ease), visibility 0s linear .65s; }
   #fBg { position: absolute; inset: 0; background: var(--mint);
          clip-path: circle(0px at 206px 410px); transition: clip-path .75s var(--ease); }
   .s-fortune #fBg, .s-home #fBg { clip-path: circle(1000px at 206px 410px); }
@@ -403,6 +410,7 @@
     <img class="abs" src="__img_home_nav__" style="left:0;top:780px;width:402px;height:94px" alt="">
     <div class="hot tab" data-tab="home" style="left:12px;top:782px;width:92px;height:66px" aria-label="홈"></div>
     <div class="hot tab" data-tab="friends" style="left:198px;top:782px;width:92px;height:66px" aria-label="친구방"></div>
+    <div class="hot to-freq" style="left:296px;top:782px;width:94px;height:66px" aria-label="주파수"></div>
    </div>
    <div class="shade"></div>
   </div>
@@ -416,7 +424,13 @@
         <div class="fr-text" style="left:16px;top:79px;width:260px;height:24px">친구들과 운세를 보며 이야기를 나눠봐요</div>
         <div class="hot" id="luckyTalk" style="left:0;top:10px;width:402px;height:100px" aria-label="Lucky Talk"></div>
         <div class="hot" id="luckyTalkCard" style="left:18px;top:125px;width:366px;height:325px" aria-label="행운 공구방"></div>
-        <div id="frRow"><img src="__img_fr_row__" alt="Lucky Moments" draggable="false"></div>
+        <div id="frRow"><div class="fr-row-in"><img src="__img_fr_row__" alt="Lucky Moments" draggable="false">
+          <button class="moment-hot" data-moment="unahynn" style="left:20px" aria-label="Unahynn의 스토리 보기"></button>
+          <button class="moment-hot" data-moment="sumin" style="left:190px" aria-label="Sumin의 스토리 보기"></button>
+          <button class="moment-hot" data-moment="minhee" style="left:361px" aria-label="Minhee의 스토리 보기"></button>
+          <button class="moment-hot" data-moment="ssu" style="left:531px" aria-label="SSU의 스토리 보기"></button>
+          <button class="moment-hot" data-moment="kwon" style="left:702px" aria-label="Kwon의 스토리 보기"></button>
+        </div></div>
       </div>
       <div class="fr-pad"></div>
     </div>
@@ -425,9 +439,13 @@
     <img class="abs" src="__img_fr_nav__" style="left:0;top:780px;width:402px;height:94px" alt="">
     <div class="hot tab" data-tab="home" style="left:12px;top:782px;width:92px;height:66px" aria-label="홈"></div>
     <div class="hot tab" data-tab="friends" style="left:198px;top:782px;width:92px;height:66px" aria-label="친구방"></div>
+    <div class="hot to-freq" style="left:296px;top:782px;width:94px;height:66px" aria-label="주파수"></div>
    </div>
    <div class="shade"></div>
   </div>
+
+  <!-- 주파수 (팀원 앱 chiring/ 을 폰 화면 안에 그대로) -->
+  <div class="layer" id="freqLayer"><iframe id="freqFrame" title="주파수" src="about:blank"></iframe></div>
 
   <!-- 1·2. 오늘의운세_딤 / 딤2 -->
   <div class="layer" id="dim">
@@ -670,6 +688,7 @@
     </div>
     <div class="hot" id="chChip" role="button" aria-label="운세 순위 비교"></div>
     <div class="hot" id="chMixChip" role="button" aria-label="운세 겹쳐보기" style="left:298px;top:124px;width:104px;height:52px"></div>
+    <div class="hot to-freq" role="button" aria-label="기운 선물하기" style="left:20px;top:124px;width:126px;height:52px;border-radius:26px"></div>
     <div class="hot back" style="left:0;top:56px;width:64px;height:50px" aria-label="뒤로"></div>
 
     <!-- 운세 순위 비교_딤: 1등 카드 등장 + 오행 이모지가 위에서 내려오며 축하 -->
@@ -884,7 +903,7 @@ function pop() {
   lock(NAV_MS);
 }
 function resetNav() {
-  stack = ["home"]; setTab("home", true);
+  stack = ["home"]; setTab("home", true); phone.classList.remove("tab-freq");
   if (typeof homeScroll !== "undefined") { homeScroll.scrollTop = 0; onHomeScroll(); }
   document.querySelectorAll(".push.on, .under, .under-m, .hcard.sel").forEach(e => e.classList.remove("on", "under", "under-m", "sel"));
   resetCamera(); stopCharm(); if (typeof resetChat === "function") resetChat();
@@ -1310,6 +1329,39 @@ document.getElementById("evShare").addEventListener("click", () => {});
 document.getElementById("replay").addEventListener("click", () => start(false));
 document.getElementById("replayFortune").addEventListener("click", () => start(true));
 // 이미지(약 6MB)가 모두 준비된 뒤 시작 → 딤1이 확실히 보이고 블러가 걷히는 장면을 놓치지 않음
-function boot() { start(false); }
+// 팀원 앱(친구방·주파수: chiring/)과 연결 — 주파수 탭·기운 선물하기 → 팀원 앱, 팀원 앱의 홈 → #home 으로 돌아옴
+const freqFrame = document.getElementById("freqFrame");
+function openFreq(where) {
+  if (busy) return;
+  // 팀원 앱을 해당 화면(#frequency 또는 #moment-이름)부터 새로 불러옴
+  const url = "chiring/index.html#" + (typeof where === "string" ? where : "frequency");
+  if (freqFrame.dataset.url) {   // 이미 열린 적 있으면 주소를 바꾼 뒤 새로 시작 (주소 끝만 바뀌면 앱이 다시 시작되지 않으므로)
+    try { const w = freqFrame.contentWindow; w.location.replace(url); w.location.reload(); } catch (e) { freqFrame.src = url; }
+  } else freqFrame.src = url;
+  freqFrame.dataset.url = url;
+  phone.classList.add("tab-freq");
+}
+function closeFreq(to) {
+  if (stack.length > 1) { resetNav(); }
+  setTab(to === "friends" ? "friends" : "home", true);
+  phone.classList.remove("tab-freq");
+}
+document.querySelectorAll(".to-freq").forEach(el => el.addEventListener("click", () => openFreq("frequency")));
+// 친구방 Lucky Moments 카드 → 팀원 앱의 스토리 화면
+document.querySelectorAll(".moment-hot").forEach(el => el.addEventListener("click", () => {
+  if (stack.length > 1 || tab !== "friends") return;
+  openFreq("moment-" + el.dataset.moment);
+}));
+addEventListener("message", e => {
+  if (e.data === "chiring:home") closeFreq("home");
+  if (e.data === "chiring:friends") closeFreq("friends");
+});
+function boot() {
+  const h = location.hash.slice(1);
+  if (h === "home" || h === "friends") {   // 다른 화면에서 돌아올 때는 오늘의 운세를 건너뜀
+    fortuneSeen = true; start(false);
+    if (h === "friends") setTab("friends", true);
+  } else start(false);
+}
 if (document.readyState === "complete") boot(); else addEventListener("load", boot, { once: true });
 </script>
