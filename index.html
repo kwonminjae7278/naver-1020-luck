@@ -386,6 +386,9 @@
   #morphTo { opacity: 0; transition: opacity .4s var(--ease) .22s; }
   .s-fortune #morph, .s-home #morph { visibility: visible; left: 34px; top: 206px; width: 334px; height: 345px; }
   .s-fortune #morphTo, .s-home #morphTo { opacity: 1; }
+  /* 전환이 끝나면 원래(딤) 카드는 숨김 → 비율이 달라 아래로 삐져나오던 기둥이 보이지 않음 */
+  #morph img:first-child { transition: opacity .25s var(--ease) .55s; }
+  .s-fortune #morph img:first-child, .s-home #morph img:first-child { opacity: 0; }
   .f-in { opacity: 0; transform: translateY(10px); transition: opacity .5s var(--ease), transform .6s var(--ease-out); }
   .s-fortune .f-in, .s-home .f-in { opacity: 1; transform: none; }
   #fSticker { transform: translateY(-16px) rotate(-4deg) scale(.9); transform-origin: 50% 80%;
