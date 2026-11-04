@@ -205,7 +205,7 @@ alpha = np.clip((np.abs(ch - bgr).max(2) - 5) / 40, 0, 1)
 col = np.clip((ch - (1 - alpha[..., None]) * bgr) / np.maximum(alpha[..., None], 1e-3), 0, 255)
 Image.fromarray(np.dstack([col, alpha * 255]).astype(np.uint8), 'RGBA').save(f'{O}/charm.png')
 clean = A18.copy(); clean[cb[1]:cb[3], cb[0]:cb[2]] = bgr
-Image.fromarray(clean.astype(np.uint8)).save(f'{O}/charm_bg.jpg', quality=93)
+Image.fromarray(clean.astype(np.uint8)).save(f'{O}/charm_bg.jpg', quality=95)
 feather(L18.crop((14, 776, 388, 848)), 4).save(f'{O}/charm_btn.png')
 
 # 결과 화면 (오늘의 행운 담기)
