@@ -75,12 +75,12 @@
   .push.on .d-hero { transition-delay: .2s; } .push.on .d-body { transition-delay: .32s; }
   .push.on .d-icons { transition-delay: .4s; } .push.on .d-btn { transition-delay: .48s; }
   .hot { position: absolute; cursor: pointer; }
-  #freqLayer { z-index: 40; background: #121212; opacity: 0; visibility: hidden; transition: opacity .22s var(--ease), visibility 0s linear .22s; }
-  .tab-freq #freqLayer { opacity: 1; visibility: visible; transition: opacity .22s var(--ease), visibility 0s; }
+  #freqLayer { z-index: 40; background: #121212; visibility: hidden; }
+  .tab-freq #freqLayer { visibility: visible; }
   #freqFrame { position: absolute; inset: 0; width: 402px; height: 874px; border: 0; display: block; background: #121212; }
   /* ── 친구방 ── */
-  #friends { background: #0e0e0e; opacity: 0; visibility: hidden; transition: opacity .25s var(--ease), visibility 0s linear .25s; }
-  .tab-friends #friends { opacity: 1; visibility: visible; transition: opacity .25s var(--ease), visibility 0s; }
+  #friends { background: #0e0e0e; visibility: hidden; }
+  .tab-friends #friends { visibility: visible; }
   #frScroll { position: absolute; left: 0; top: 104px; width: 402px; height: 770px; overflow-y: auto; overflow-x: hidden;
               overscroll-behavior: contain; scrollbar-width: none; cursor: grab; -webkit-overflow-scrolling: touch; }
   #frScroll::-webkit-scrollbar { display: none; }
@@ -1337,21 +1337,32 @@ document.getElementById("replayFortune").addEventListener("click", () => start(t
 // 이미지(약 6MB)가 모두 준비된 뒤 시작 → 딤1이 확실히 보이고 블러가 걷히는 장면을 놓치지 않음
 // 팀원 앱(친구방·주파수: chiring/)과 연결 — 주파수 탭·기운 선물하기 → 팀원 앱, 팀원 앱의 홈 → #home 으로 돌아옴
 const freqFrame = document.getElementById("freqFrame");
+// 주파수(팀원 앱)는 미리 불러 두고, 화면이 다 그려진 다음에 보여 줌 → 빈 화면·깜빡임 없음
+const FREQ_HOME = "chiring/index.html#frequency";
+let freqReady = false, freqWant = null;
+function loadFreq(url) {
+  freqReady = false; freqFrame.dataset.url = url;
+  try { const w = freqFrame.contentWindow; if (w && w.location.href !== "about:blank") { w.location.replace(url); w.location.reload(); return; } } catch (e) {}
+  freqFrame.src = url;
+}
+freqFrame.addEventListener("load", () => {
+  if (freqFrame.src === "about:blank" && !freqFrame.dataset.url) return;
+  // 첫 화면이 그려질 시간을 조금 준 뒤 준비 완료
+  setTimeout(() => { freqReady = true; if (freqWant === freqFrame.dataset.url) { phone.classList.add("tab-freq"); freqWant = null; } }, 120);
+});
 function openFreq(where) {
   if (busy) return;
-  // 팀원 앱을 해당 화면(#frequency 또는 #moment-이름)부터 새로 불러옴
   const url = "chiring/index.html#" + (typeof where === "string" ? where : "frequency");
-  if (freqFrame.dataset.url) {   // 이미 열린 적 있으면 주소를 바꾼 뒤 새로 시작 (주소 끝만 바뀌면 앱이 다시 시작되지 않으므로)
-    try { const w = freqFrame.contentWindow; w.location.replace(url); w.location.reload(); } catch (e) { freqFrame.src = url; }
-  } else freqFrame.src = url;
-  freqFrame.dataset.url = url;
-  phone.classList.add("tab-freq");
+  if (freqReady && freqFrame.dataset.url === url) { phone.classList.add("tab-freq"); return; }   // 미리 불러 둔 화면을 바로 보여 줌
+  freqWant = url; loadFreq(url);                                                                // 다른 화면이면 불러온 뒤 보여 줌
 }
 function closeFreq(to) {
   if (stack.length > 1) { resetNav(); }
   setTab(to === "friends" ? "friends" : "home", true);
   phone.classList.remove("tab-freq");
+  setTimeout(() => loadFreq(FREQ_HOME), 50);   // 다음에 열 때를 위해 주파수 첫 화면을 뒤에서 다시 준비
 }
+addEventListener("load", () => setTimeout(() => { if (!freqFrame.dataset.url) loadFreq(FREQ_HOME); }, 1500));
 document.querySelectorAll(".to-freq").forEach(el => el.addEventListener("click", () => openFreq("frequency")));
 // 친구방 Lucky Moments 카드 → 팀원 앱의 스토리 화면
 document.querySelectorAll(".moment-hot").forEach(el => el.addEventListener("click", () => {
