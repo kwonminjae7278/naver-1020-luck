@@ -2,6 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,800..900&display=swap" />
 <style>
+  @font-face { font-family: "Pretendard"; font-weight: 400; font-display: block; src: url(__font_pretendard-regular__) format("woff2"); }
   @font-face { font-family: "Pretendard"; font-weight: 500; font-display: block; src: url(__font_pretendard-medium__) format("woff2"); }
   @font-face { font-family: "Pretendard"; font-weight: 600; font-display: block; src: url(__font_pretendard-semibold__) format("woff2"); }
   @font-face { font-family: "Pretendard"; font-weight: 700; font-display: block; src: url(__font_pretendard-bold__) format("woff2"); }
@@ -69,6 +70,16 @@
   .push.on .d-hero { transition-delay: .2s; } .push.on .d-body { transition-delay: .32s; }
   .push.on .d-icons { transition-delay: .4s; } .push.on .d-btn { transition-delay: .48s; }
   .hot { position: absolute; cursor: pointer; }
+  /* 공통 하단 내비 (팀원 앱 .bottom-nav 와 같은 값) */
+  .bottom-nav { position: absolute; left: 0; top: 780px; width: 402px; height: 94px; margin: 0; background: rgba(40, 40, 40, .9);
+                -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-radius: 30px 30px 0 0;
+                font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .bottom-nav__list { display: grid; grid-template-columns: repeat(4, 1fr); padding: 12px 28px 0; margin: 0; list-style: none; }
+  .bottom-nav__item { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0; border: 0; background: none;
+                      color: #6e767c; font: inherit; font-size: 13px; font-weight: 400; line-height: 2; letter-spacing: -.065px; cursor: pointer; }
+  .bottom-nav__item.is-active { color: #fff; font-weight: 600; }
+  .bottom-nav__item svg { display: block; }
+  .home-indicator { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; margin-left: -67px; border-radius: 100px; background: #fff; }
   #freqLayer { z-index: 40; background: #121212; visibility: hidden; }
   .tab-freq #freqLayer { visibility: visible; }
   #freqFrame { position: absolute; inset: 0; width: 402px; height: 874px; border: 0; display: block; background: #121212; }
@@ -407,10 +418,6 @@
      </div>
     </div>
     <img class="abs" src="__img_home_head__" style="left:0;top:0;width:402px;height:104px" alt="OCT 19 SUN">
-    <img class="abs" src="__img_home_nav__" style="left:0;top:780px;width:402px;height:94px" alt="">
-    <div class="hot tab" data-tab="home" style="left:12px;top:782px;width:92px;height:66px" aria-label="홈"></div>
-    <div class="hot tab" data-tab="friends" style="left:198px;top:782px;width:92px;height:66px" aria-label="친구방"></div>
-    <div class="hot to-freq" style="left:296px;top:782px;width:94px;height:66px" aria-label="주파수"></div>
    </div>
    <div class="shade"></div>
   </div>
@@ -436,13 +443,12 @@
     </div>
     <img class="abs" src="__img_fr_head__" style="left:0;top:0;width:402px;height:104px" alt="친구방">
     <div class="fr-head-t">친구방</div>
-    <img class="abs" src="__img_fr_nav__" style="left:0;top:780px;width:402px;height:94px" alt="">
-    <div class="hot tab" data-tab="home" style="left:12px;top:782px;width:92px;height:66px" aria-label="홈"></div>
-    <div class="hot tab" data-tab="friends" style="left:198px;top:782px;width:92px;height:66px" aria-label="친구방"></div>
-    <div class="hot to-freq" style="left:296px;top:782px;width:94px;height:66px" aria-label="주파수"></div>
    </div>
    <div class="shade"></div>
   </div>
+
+  <!-- 하단 내비: 홈·친구방·주파수 모두 같은 모양 (팀원 앱 내비와 동일) -->
+  <nav class="bottom-nav" id="appNav" aria-label="하단 메뉴"><ul class="bottom-nav__list"><li><button type="button" data-tab="home" class="bottom-nav__item"><svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.0098 3H15.0116V4.45584H16.0125V6.06766H17.0134V7.17687H18.0142V8.28609H19.0151V9.3953H20.016V10.5045H21.0169V11.6137H22.0178V12.7229H23.0187V13.8321H24.0196V14.9414H25.0205V16.0506H26.0214V17.1598H21.7752V25.9295H17.0134V19.3782H11.008V25.9295H6.36752V17.1598H2V16.0506H3.00089V14.9414H4.00178V13.8321H5.00267V12.7229H6.00356V11.6137H7.00445V10.5045H8.00534V9.3953H9.00623V8.28609H10.0071V7.17687H11.008V6.06766H12.0089V4.45584H13.0098V3Z"></path><rect x="9.03906" y="16.4648" width="10.1909" height="9.46296"></rect></svg><span>홈</span></button></li><li><button type="button" data-tab="myluck" class="bottom-nav__item"><svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" aria-hidden="true"><path d="M15 13H13V11H11V9H9V3L13 3V5H15V3H19V9H17V11H15V13ZM15 13H17V11H19V9H25V13H23V15H25V19H19V17H17V15H15V13ZM9 19H3V15H5V13H3L3 9H9V11H11V13H13V15H11V17H9V19ZM9 19H11V17H13V15H15V17H17V19H19V25H15V23H13V25H9V19Z"></path></svg><span>내 행운</span></button></li><li><button type="button" data-tab="friends" class="bottom-nav__item"><svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.4116 3H16.9702V3.93174H17.8967V4.86348H18.8231V5.79521H19.7495V10.4539H18.8231V11.3856H17.8967V12.3174H16.9702V13.2491H11.4116V12.3174H10.4851V11.3856H9.55866V10.4539H8.63222V5.79521H9.55866V4.86348H10.4851V3.93174H11.4116V3ZM11.4116 15.1126H16.9702V16.0443H18.8231V16.9761H20.676V17.9078H21.6024V18.8395H22.5289V19.7713H23.4553V21.6348H24.3818V26.2934H23.4553V26.2094H4.92644V26.2934H4V21.6348H4.92644V19.7713H5.85289V18.8395H6.77933V17.9078H7.70578V16.9761H9.55866V16.0443H11.4116V15.1126Z"></path></svg><span>친구방</span></button></li><li><button type="button" data-tab="frequency" class="bottom-nav__item is-active" aria-current="page"><svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.2322 0H15.2744V5.06944H16.2955V9.125H20.38V11.1528H19.3589V12.1667H22.4222V13.1806H26.5066V15.2083H22.4222V16.2222H19.3589V17.2361H20.38V19.2639H16.2955V23.3194H15.2744V28H13.2322V23.3194H12.2111V19.2639H8.12666V17.2361H9.14777V16.2222H6.08444V15.2083H2V13.1806H6.08444V12.1667H9.14777V11.1528H8.12666V9.125H12.2111V5.06944H13.2322V0Z"></path></svg><span>주파수</span></button></li></ul><div class="home-indicator"></div></nav>
 
   <!-- 주파수 (팀원 앱 chiring/ 을 폰 화면 안에 그대로) -->
   <div class="layer" id="freqLayer"><iframe id="freqFrame" title="주파수" src="about:blank"></iframe></div>
@@ -823,11 +829,21 @@ function setTab(name, instant) {
   if (owned) phone.classList.add("no-anim");
   phone.classList.toggle("tab-friends", name === "friends");
   if (name === "friends") frScroll.scrollTop = 0;
+  syncNav(name);
   if (owned) { void phone.offsetWidth; phone.classList.remove("no-anim"); }
 }
-document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
-  if (busy || stack.length > 1 || !phone.classList.contains("s-home")) return;
-  setTab(t.dataset.tab);
+const appNav = document.getElementById("appNav");
+function syncNav(name) {
+  appNav.querySelectorAll(".bottom-nav__item").forEach(b => {
+    const on = b.dataset.tab === name; b.classList.toggle("is-active", on);
+    if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+}
+appNav.querySelectorAll(".bottom-nav__item").forEach(b => b.addEventListener("click", () => {
+  if (stack.length > 1 || !phone.classList.contains("s-home")) return;
+  const k = b.dataset.tab;
+  if (k === "frequency") openFreq("frequency");
+  else if (k === "home" || k === "friends") setTab(k);
 }));
 // 데스크톱에서도 마우스로 끌어서 스크롤 (터치·트랙패드·휠은 기본 스크롤). 5px 넘게 움직여야 드래그로 판단 → 탭은 그대로 동작
 function dragScroll(el, axis) {
@@ -903,7 +919,8 @@ function pop() {
   lock(NAV_MS);
 }
 function resetNav() {
-  stack = ["home"]; setTab("home", true); phone.classList.remove("tab-freq");
+  stack = ["home"]; setTab("home", true);
+  if (phone.classList.contains("tab-freq")) { phone.classList.remove("tab-freq"); if (typeof freqSend === "function") freqSend("chiring:reset"); }
   if (typeof homeScroll !== "undefined") { homeScroll.scrollTop = 0; onHomeScroll(); }
   document.querySelectorAll(".push.on, .under, .under-m, .hcard.sel").forEach(e => e.classList.remove("on", "under", "under-m", "sel"));
   resetCamera(); stopCharm(); if (typeof resetChat === "function") resetChat();
@@ -1331,36 +1348,33 @@ document.getElementById("replayFortune").addEventListener("click", () => start(t
 // 이미지(약 6MB)가 모두 준비된 뒤 시작 → 딤1이 확실히 보이고 블러가 걷히는 장면을 놓치지 않음
 // 팀원 앱(친구방·주파수: chiring/)과 연결 — 주파수 탭·기운 선물하기 → 팀원 앱, 팀원 앱의 홈 → #home 으로 돌아옴
 const freqFrame = document.getElementById("freqFrame");
-// 주파수(팀원 앱)는 미리 불러 두고, 화면이 다 그려진 다음에 보여 줌 → 빈 화면·깜빡임 없음
-const FREQ_HOME = "chiring/index.html#frequency";
-let freqReady = false, freqWant = null;
-function loadFreq(url) {
-  freqReady = false; freqFrame.dataset.url = url;
-  try { const w = freqFrame.contentWindow; if (w && w.location.href !== "about:blank") { w.location.replace(url); w.location.reload(); return; } } catch (e) {}
-  freqFrame.src = url;
+// 주파수(팀원 앱)는 한 번만 불러 두고, 화면 전환은 신호(postMessage)로 → 다시 불러오지 않아 빈 화면·무반응이 생기지 않음
+let freqLoaded = false, freqQueue = [];
+function freqSend(msg) {
+  if (freqLoaded) { try { freqFrame.contentWindow.postMessage(msg, "*"); } catch (e) {} }
+  else freqQueue.push(msg);
 }
 freqFrame.addEventListener("load", () => {
-  if (freqFrame.src === "about:blank" && !freqFrame.dataset.url) return;
-  // 첫 화면이 그려질 시간을 조금 준 뒤 준비 완료
-  setTimeout(() => { freqReady = true; if (freqWant === freqFrame.dataset.url) { phone.classList.add("tab-freq"); freqWant = null; } }, 120);
+  if (!freqFrame.getAttribute("src") || freqFrame.getAttribute("src") === "about:blank") return;
+  freqLoaded = true; const q = freqQueue; freqQueue = []; q.forEach(freqSend);
 });
+function ensureFreq() { if (!freqFrame.dataset.started) { freqFrame.dataset.started = "1"; freqFrame.src = "chiring/index.html#frequency"; } }
 function openFreq(where) {
-  if (busy) return;
-  const url = "chiring/index.html#" + (typeof where === "string" ? where : "frequency");
-  if (freqReady && freqFrame.dataset.url === url) { phone.classList.add("tab-freq"); return; }   // 미리 불러 둔 화면을 바로 보여 줌
-  freqWant = url; loadFreq(url);                                                                // 다른 화면이면 불러온 뒤 보여 줌
+  ensureFreq();
+  if (typeof where === "string" && where.startsWith("moment-")) freqSend("chiring:moment:" + where.slice(7));
+  phone.classList.add("tab-freq");                 // 누르면 항상 바로 보임
 }
 function closeFreq(to) {
   if (stack.length > 1) { resetNav(); }
   setTab(to === "friends" ? "friends" : "home", true);
   phone.classList.remove("tab-freq");
-  setTimeout(() => loadFreq(FREQ_HOME), 50);   // 다음에 열 때를 위해 주파수 첫 화면을 뒤에서 다시 준비
+  freqSend("chiring:reset");                       // 다음에 열 때 주파수 첫 화면부터 (안 보이는 동안 정리)
 }
-addEventListener("load", () => setTimeout(() => { if (!freqFrame.dataset.url) loadFreq(FREQ_HOME); }, 1500));
-document.querySelectorAll(".to-freq").forEach(el => el.addEventListener("click", () => openFreq("frequency")));
+addEventListener("load", () => setTimeout(ensureFreq, 800));
+document.querySelectorAll(".to-freq").forEach(el => el.addEventListener("click", () => { if (!busy) openFreq("frequency"); }));
 // 친구방 Lucky Moments 카드 → 팀원 앱의 스토리 화면
 document.querySelectorAll(".moment-hot").forEach(el => el.addEventListener("click", () => {
-  if (stack.length > 1 || tab !== "friends") return;
+  if (stack.length > 1 || tab !== "friends" || phone.classList.contains("tab-freq")) return;
   openFreq("moment-" + el.dataset.moment);
 }));
 addEventListener("message", e => {

@@ -7,7 +7,7 @@ src = open(f'{d}/src.html', encoding='utf-8').read()
 text = re.sub(r'data:[^"\')]+', '', src)
 chars = set(text) | set('0123456789:~!?.,ㅋㅎㅠㄱ ')
 chars = ''.join(sorted(c for c in chars if c >= ' '))
-for w in ['Medium', 'SemiBold', 'Bold']:
+for w in ['Regular', 'Medium', 'SemiBold', 'Bold']:
     opts = subset.Options(); opts.flavor = 'woff2'; opts.layout_features = ['*']; opts.name_IDs = ['*']
     f = subset.load_font(f'{pkg}/dist/web/static/woff2/Pretendard-{w}.woff2', opts)
     s = subset.Subsetter(opts); s.populate(text=chars); s.subset(f)
